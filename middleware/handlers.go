@@ -2,18 +2,18 @@ package middleware
 
 import (
 	"database/sql"
-	"encoding/json"
+	"encoding/json" // package to encode and decode the json into struct and vice versa
 	"fmt"
-	"go-postgres/models"
+	"go-postgres/models" // models package where User schema is defined
 	"log"
-	"net/http"
-	"os"
-	"strconv"
+	"net/http" // used to access the request and response object of the api
+	"os"       // used to read the environment variable
+	"strconv"  // package used to covert string into int type
 
-	"github.com/gorilla/mux"
+	"github.com/gorilla/mux" // used to get the params from the route
 
-	"github.com/joho/godotenv"
-	_ "github.com/lib/pq" // postgres golang driver
+	"github.com/joho/godotenv" // package used to read the .env file
+	_ "github.com/lib/pq"      // postgres golang driver
 )
 
 // response format
@@ -53,21 +53,26 @@ func createConnection() *sql.DB {
 // CreateUser create a user in the postgres db
 func CreateUser(w http.ResponseWriter, r *http.Request) {
 
+	// create an empty user of type models.User
 	var user models.User
 
+	// decode the json request to user
 	err := json.NewDecoder(r.Body).Decode(&user)
 
 	if err != nil {
 		log.Fatalf("Unable to decode the request body.  %v", err)
 	}
 
+	// call insert user function and pass the user
 	insertID := insertUser(user)
 
+	// format a response object
 	res := response{
 		ID:      insertID,
 		Message: "User created successfully",
 	}
 
+	// send the response
 	json.NewEncoder(w).Encode(res)
 }
 
@@ -83,24 +88,28 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Unable to convert the string into int.  %v", err)
 	}
 
+	// call the getUser function with user id to retrieve a single user
 	user, err := getUser(int64(id))
 
 	if err != nil {
 		log.Fatalf("Unable to get user. %v", err)
 	}
 
+	// send the response
 	json.NewEncoder(w).Encode(user)
 }
 
 // GetAllUser will return all the users
 func GetAllUser(w http.ResponseWriter, r *http.Request) {
 
+	// get all the users in the db
 	users, err := getAllUsers()
 
 	if err != nil {
 		log.Fatalf("Unable to get all user. %v", err)
 	}
 
+	// send all the users as response
 	json.NewEncoder(w).Encode(users)
 }
 
@@ -117,8 +126,10 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Unable to convert the string into int.  %v", err)
 	}
 
+	// create an empty user of type models.User
 	var user models.User
 
+	// decode the json request to user
 	err = json.NewDecoder(r.Body).Decode(&user)
 
 	if err != nil {
@@ -131,11 +142,13 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	// format the message string
 	msg := fmt.Sprintf("User updated successfully. Total rows/record affected %v", updatedRows)
 
+	// format the response message
 	res := response{
 		ID:      int64(id),
 		Message: msg,
 	}
 
+	// send the response
 	json.NewEncoder(w).Encode(res)
 }
 
@@ -158,11 +171,13 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	// format the message string
 	msg := fmt.Sprintf("User updated successfully. Total rows/record affected %v", deletedRows)
 
+	// format the reponse message
 	res := response{
 		ID:      int64(id),
 		Message: msg,
 	}
 
+	// send the response
 	json.NewEncoder(w).Encode(res)
 }
 
@@ -177,11 +192,14 @@ func insertUser(user models.User) int64 {
 	defer db.Close()
 
 	// create the insert sql query
+	// returning userid will return the id of the inserted user
 	sqlStatement := `INSERT INTO users (name, location, age) VALUES ($1, $2, $3) RETURNING userid`
 
+	// the inserted id will store in this id
 	var id int64
 
 	// execute the sql statement
+	// Scan function will save the insert id in the id
 	err := db.QueryRow(sqlStatement, user.Name, user.Location, user.Age).Scan(&id)
 
 	if err != nil {
@@ -190,6 +208,7 @@ func insertUser(user models.User) int64 {
 
 	fmt.Printf("Inserted a single record %v", id)
 
+	// return the inserted id
 	return id
 }
 
@@ -201,6 +220,7 @@ func getUser(id int64) (models.User, error) {
 	// close the db connection
 	defer db.Close()
 
+	// create a user of models.User type
 	var user models.User
 
 	// create the select sql query
