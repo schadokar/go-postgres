@@ -53,6 +53,11 @@ func createConnection() *sql.DB {
 // CreateUser create a user in the postgres db
 func CreateUser(w http.ResponseWriter, r *http.Request) {
 
+	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
 	// create an empty user of type models.User
 	var user models.User
 
@@ -78,6 +83,8 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 // GetUser will return a single user by its id
 func GetUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	// get the userid from the request params, key is "id"
 	params := mux.Vars(r)
 
@@ -101,7 +108,8 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 // GetAllUser will return all the users
 func GetAllUser(w http.ResponseWriter, r *http.Request) {
-
+	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	// get all the users in the db
 	users, err := getAllUsers()
 
@@ -115,6 +123,11 @@ func GetAllUser(w http.ResponseWriter, r *http.Request) {
 
 // UpdateUser update user's detail in the postgres db
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "PUT")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	// get the userid from the request params, key is "id"
 	params := mux.Vars(r)
@@ -155,6 +168,11 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 // DeleteUser delete user's detail in the postgres db
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 
+	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
 	// get the userid from the request params, key is "id"
 	params := mux.Vars(r)
 
@@ -169,7 +187,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	deletedRows := deleteUser(int64(id))
 
 	// format the message string
-	msg := fmt.Sprintf("User updated successfully. Total rows/record affected %v", deletedRows)
+	msg := fmt.Sprintf("User deleted successfully. Total rows/record affected %v", deletedRows)
 
 	// format the reponse message
 	res := response{
